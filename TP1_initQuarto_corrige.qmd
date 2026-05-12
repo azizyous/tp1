@@ -1,0 +1,210 @@
+---
+title: "TP1 - Statistique avec R"  # Titre du document
+description: "Découverte de Quarto en sortie html"  # Description ou objectif du document
+author: "Aziz Youssfi"  # Auteur du document, à remplacer par votre nom
+format: 
+  html:  # Format de sortie du document (ici en HTML)
+    embed-resources: true # Incorporer toutes les ressources nécessaires (comme le CSS et les images) directement dans le fichier HTML.
+    toc: true  # Créer la table des matières/le sommaire
+    toc-location: left # Où souhaitez-vous placer ce sommaire.
+lang: fr  # Langue du document (ici en français)
+from: markdown+emoji  # Format d'entrée pour le document (markdown avec support des emojis)
+number-sections: true  # Numéroter les sections du document
+lightbox: true  # Activer la fonctionnalité Lightbox pour afficher des images ou autres contenus en plein écran
+---
+
+<!--Cette première partie ci-dessus entre deux « --- » s’appelle un « YAML header » (nom en anglais aussi utilisé en français) ou un « en-tête YAML ».-->
+
+
+Ce document Quarto est téléchargeable sur Moodle, disponible ici : <https://foad-moodle.ensai.fr/mod/folder/view.php?id=13549>{target="_blank"}.
+
+
+# Principales fonctionnalités d'un script `.qmd`
+
+## Pourquoi utiliser **Quarto** ?{#avantages_quarto}
+
+- *Reproductibilité* : Les résultats sont toujours les mêmes lorsque vous réexécutez le code via : 
+  + le bouton :arrow_right: `Render` 
+  + :bulb: ou via `Ctrl` + `Maj` + `K`, l'analogue du `Ctrl` + `Enter` dans un script R
+- *Polyvalence* : Supporte plusieurs langages, différents types de sortie, et des formats variés.
+- *Efficacité* : Un seul document pour tout intégrer (texte, code, graphiques, etc.).
+- *Simplicité* : Le format markdown est simple à comprendre et à utiliser pour des étudiants.
+
+<!-- Et plein d'autres arguments... -->
+
+En résumé, [Quarto](https://quarto.org) est un [excellent]{style="color:red;"} outil pour produire des documents dynamiques et reproductibles, qui combinent à la fois texte et analyses de données, dans un format flexible et interactif.
+
+
+## Comment intégrer une **formule LaTeX** ?
+
+Les documents Quarto dans RStudio permettent d'utliser du langage $\LaTeX$ math pour la rédaction de formules mathématiques. 
+
+Exemple :
+
+> Soient $X_1, X_2, \ldots, X_n$ une suite de variables aléatoires indépendantes et identiquement distribuées, telle que $\text{E}[X_i] = \mu$ et $\text{Var}[X_i] = \sigma^2 < \infty$. On définit :
+
+$$
+S_n = \frac{X_1 + X_2 + \cdots + X_n}{n}
+      = \frac{1}{n}\sum_{i}^{n} X_i
+$$
+<!-- Les formules mathématiques en Latex... c'est bien long. Utiliser une IA générative pour les créer, ça c'est une utilisation efficace !  -->
+
+## Comment intégrer une **image** ?
+
+Un des gros avantages de Quarto (résumés dans le point "efficacité" de la [première section](#avantages_quarto)) est aussi l'intégration simplifiée d'images.
+
+![Logo de l’Ensai](ensai_logo_1.png){#fig-logoensai}
+
+## Comment intégrer du **code R** ?
+
+### Afficher du code ET du résultat
+
+```{r}
+1 + 1 # une idée du résultat ?
+```
+
+
+Ici, on fait apparaitre le code et on affiche également le résultat du chunk (ici 1+1 = 2).
+
+
+### Afficher UNIQUEMENT le résultat du code (sans afficher le bloc de code)
+
+```{r, echo = FALSE}
+2 + 2 # une idée du résultat ?
+```
+
+### `results = "hide"` : Afficher UNIQUEMENT le bloc de code sans le résultat
+
+```{r, results = "hide"}
+3 + 3 # une idée du résultat ?
+```
+
+Le résultat (6) n'apparait, mais pour autant le quarto va tout de même l'exécuter !
+
+Remarque : pour afficher uniquement du code SANS l'exécuter, il faut ajouter l'option `eval = FALSE`
+
+```{r, eval = FALSE}
+3 + 3 # une idée du résultat ?
+```
+
+### `include = FALSE` : Exécuter le code SANS AFFICHER ni le résultat ni le bloc de code
+
+```{r, include = FALSE}
+4 + 4 # une idée du résultat ?
+```
+
+### Mon premier graphique
+
+```{r}
+set.seed(2026) # On fixe la graine aléatoire de la bonne année.
+# La graine permet d’obtenir une reproductibilité des résultats quand l’on fait appel à un processus aléatoire. Pour cela, il faut appeler à chaque fois la même graine (c’est-à-dire le même numéro de graine)
+
+echantillon <- rnorm(n = 1000)
+
+plot(x = 1:1000, y = echantillon, 
+     xlab = "indice i", ylab = "X_i ~ N(0;1)", 
+     main = "Un échantillon de  N(0;1)")
+```
+
+### Utilisation d'un résultat de code au sein d'un texte
+
+La moyenne de mon échantillon vaut : `r round(mean(echantillon),4)`.
+
+
+## Graphiques avec ggplot2 (cf. TP2)
+
+Pour ne pas être embêté avec les messages relatifs aux chargements de packages, on peut ajouter dans le chunk l'option : `message = FALSE`.
+
+```{r, message = FALSE}
+# Import des packages
+library(dplyr)
+library(ggplot2)
+library(plotly)
+
+# Import de la table "starwars"
+data(package="dplyr")
+data("starwars")  
+
+# On charge la table starwars du package dplyr (on travaillera avec cette table au TP2).
+# Cette table comporte notamment des informations sur les personnages des films.
+
+starwars <- starwars %>% 
+  # Parmi tous les personages de la table, on conserve uniquement ceux ayant une masse et une taille non manquantes
+  filter(is.na(height) == FALSE,
+         is.na(mass) == FALSE)
+
+# On affiche le nuage de point (nous détaillerons la syntaxe au TP2)
+g <- ggplot(data=starwars,
+            aes(x = height, y= mass ))+
+  geom_point()
+
+plotly::ggplotly(g)
+```
+
+
+## Les blocs "callout"
+
+::: {.callout-note collapse="true" title="Pour savoir comment rédiger une formule..."}
+Une imbrication entre deux symboles dollar (« `$` »), un de chaque côté, sert à écrire des formules en ligne au milieu du texte. Une imbrication entre quatre symboles dollar, deux sur une première ligne et deux sur une dernière, à les écrire dans un paragraphe centré par rapport aux marges gauche et droite et propre à cette formule.
+:::
+
+L'option `collapse="true"` vous permet d'afficher un bloc qui peut être plié/déplié.
+
+
+
+
+---
+
+
+# Partie TP rappels S1 dplyr
+
+## Exercice 3 : un peu de stat
+
+Un ascenseur a une capacité de 10 personnes et une charge maximale de 800 kg. On suppose que le poids des hommes suit une loi normale d’**espérance 75 kg avec un écart-type de 12**. On suppose que le poids des femmes suit également une loi normale d’**espérance 65 kg avec un écart-type de 10**. Par ailleurs, **la probabilité qu’un individu soit un homme est de 0.504** et **la probabilité d’être une femme est de 0.496**. Le but de cet exercice est d’estimer la probabilité que l’ascenseur se trouve en surcharge avec **10 personnes**.
+
+1. À partir des informations précédentes, simuler un groupe de 10 personnes ainsi que son poids.
+
+```{r}
+set.seed(2026)
+
+n <- 10 # nb de personnes totales dans l'ascenceur
+femmes <- rbinom(n = 1, size = 10, prob = 0.496) # nb "probable" de femmes (d'après la proba de l'énoncé)
+
+poids_femmes <- rnorm(n = femmes, mean = 65, sd = 12)
+poids_hommes <- rnorm(n = n - femmes, mean = 75, sd = 12)
+
+poids_ascenceur <- sum(poids_femmes) + sum(poids_hommes)
+
+```
+
+Le poids du premier ascenceur/premier groupe simulé est de : `r round(poids_ascenceur)` kg.
+
+2. En utilisant les simulations de la question précédente, représenter la distribution du poids de
+l’ascenseur en simulant 500 groupes (de 10 personnes).
+
+```{r}
+poids_500 <- rep(NA_real_, 500)
+
+for(i in 1:500){
+  
+  femmes <- rbinom(n = 1, size = 10, prob = 0.496)
+
+  poids_femmes <- rnorm(n = femmes, mean = 65, sd = 12)
+  poids_hommes <- rnorm(n = n - femmes, mean = 75, sd = 12)
+  
+  poids_500[i] <- sum(poids_femmes) + sum(poids_hommes)  # ou utiliser append()
+}
+
+hist(poids_500, main = "Distribution d'une simu. de 500 groupes")
+```
+
+
+3. À partir de la question précédente, donner une estimation de la probabilité que l’ascenseur soit en surcharge.
+
+```{r}
+proba_surcharge <- sum(poids_500 > 800)/500 # L'ascenceur est en surcharge si le poids total dépasse 800kg.
+# Nous effectuons 500 simulations, donc il faut diviser le comptage des "poids > 800" par 500.
+```
+
+La probabilité qu'un ascenceur de 10 personnes soit en surcharge (> 800 kg) est de `r proba_surcharge`.
+
